@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>清除旧缓存 / Reset WebUI cache</title>
+<style>
+  body{font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;background:#0d0d0d;color:#e5e5e5;
+       display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0}
+  .box{max-width:640px;padding:32px;line-height:1.7}
+  h1{font-size:20px;margin:0 0 12px}
+  code{background:#262626;padding:2px 6px;border-radius:4px}
+  .ok{color:#4ade80}
+  .err{color:#f87171}
+  button{margin-top:16px;padding:10px 18px;border-radius:8px;border:0;background:#4ade80;color:#0d0d0d;
+         font-size:15px;font-weight:600;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>正在清除旧版 WebUI 缓存…</h1>
+  <p>这一步会注销旧的 Service Worker、清除本站缓存，然后跳转到中文界面。</p>
+  <p id="status">处理中…</p>
+  <button onclick="location.replace('/')">手动进入 WebUI</button>
+</div>
+<script>
+(async function () {
+  var log = [];
+  try {
+    if ('serviceWorker' in navigator) {
+      var regs = await navigator.serviceWorker.getRegistrations();
+      for (var i = 0; i < regs.length; i++) { await regs[i].unregister(); }
+      log.push('已注销 Service Worker ×' + regs.length);
+    }
+  } catch (e) { log.push('SW 注销失败: ' + e.message); }
+  try {
+    if (window.caches) {
+      var keys = await caches.keys();
+      for (var k = 0; k < keys.length; k++) { await caches.delete(keys[k]); }
+      log.push('已清除 Cache Storage ×' + keys.length);
+    }
+  } catch (e) { log.push('Cache 清除失败: ' + e.message); }
+  log.push('完成，正在跳转…');
+  document.getElementById('status').innerHTML = log.map(function (s) {
+    return '<span class="ok">✓ ' + s + '</span>';
+  }).join('<br>');
+  setTimeout(function () { location.replace('/?v=' + Date.now()); }, 900);
+})();
+</script>
+</body>
+</html>

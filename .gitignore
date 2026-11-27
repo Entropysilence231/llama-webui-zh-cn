@@ -1,0 +1,9 @@
+# 生成物：不入库（避免打包发布第三方库产物）
+webui-en/
+webui-zh/
+report.txt
+
+__pycache__/
+*.pyc
+*.log
+.DS_Store
